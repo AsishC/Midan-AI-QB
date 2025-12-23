@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 style="margin:0 0 12px 0;font-size:18px;">Automation Agents</h2>
+      <p style="margin:0 0 18px 0;font-size:13px;color:#9ca3af;">Run media & current affairs agents from the UI.</p>
+
+      {% if message %}
+        <div style="padding:10px 12px;border-radius:12px;background:#052e1a;border:1px solid #14532d;color:#d1fae5;margin-bottom:14px;">
+          {{ message }}
+        </div>
+      {% endif %}
+
+      <div style="padding:14px;border-radius:18px;background:#0b1120;border:1px solid #1f2937;margin-bottom:14px;">
+        <h3 style="margin:0 0 6px 0;font-size:15px;">Media Agent</h3>
+        <p style="margin:0 0 12px 0;font-size:12px;color:#9ca3af;">
+          Fetches image/logo/audio/video/YouTube candidates for questions with media_status = PENDING.
+        </p>
+
+        <form method="post" action="/agents/media">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;align-items:end;">
+            <div>
+              <label style="font-size:12px;color:#9ca3af;">Limit (questions)</label><br/>
+              <input name="limit" type="number" value="25"
+                     style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;"/>
+            </div>
+            <div>
+              <label style="font-size:12px;color:#9ca3af;">Question Type Filter</label><br/>
+              <select name="question_type"
+                      style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
+                <option value="">All media types</option>
+                <option value="picture">picture</option>
+                <option value="logo">logo</option>
+                <option value="audio">audio</option>
+                <option value="video">video</option>
+                <option value="youtube">youtube</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:12px;color:#9ca3af;">Run</label><br/>
+              <button type="submit"
+                      style="padding:9px 12px;border-radius:10px;border:0;background:#f59e0b;color:#111827;font-weight:600;width:100%;cursor:pointer;">
+                Run Media Agent (All Pending)
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div style="padding:14px;border-radius:18px;background:#0b1120;border:1px solid #1f2937;">
+        <h3 style="margin:0 0 6px 0;font-size:15px;">Current Affairs Update Agent</h3>
+        <p style="margin:0 0 12px 0;font-size:12px;color:#9ca3af;">
+          Re-validates factual answers for categories marked as current affairs.
+        </p>
+
+        <form method="post" action="/agents/factcheck">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;align-items:end;">
+            <div>
+              <label style="font-size:12px;color:#9ca3af;">Category (optional)</label><br/>
+              <select name="category_id"
+                      style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
+                <option value="">All current-affairs categories</option>
+                {% for c in categories %}
+                  <option value="{{ c.id }}">{{ c.name_en }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div>
+              <label style="font-size:12px;color:#9ca3af;">Limit (questions)</label><br/>
+              <input name="limit" type="number" value="50"
+                     style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;"/>
+            </div>
+            <div>
+              <label style="font-size:12px;color:#9ca3af;">Run</label><br/>
+              <button type="submit"
+                      style="padding:9px 12px;border-radius:10px;border:0;background:#f59e0b;color:#111827;font-weight:600;width:100%;cursor:pointer;">
+                Run Current Affairs Update
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+{% endblock %}

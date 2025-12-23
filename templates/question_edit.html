@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!doctype html>
+<html>
+  <head><meta charset="utf-8"><title>Edit Question #{{ question.id }}</title></head>
+  <body style="background:#020617;color:#e5e7eb;font-family:-apple-system,system-ui;">
+    <div style="max-width:1120px;margin:24px auto;padding:12px 16px;">
+      <a href="/categories/{{ question.category_id }}/questions" style="font-size:12px;color:#9ca3af;">← Back to questions</a>
+      <h1 style="margin:4px 0 12px 0;font-size:22px;">Edit Question #{{ question.id }}</h1>
+
+      <form method="post" enctype="multipart/form-data" style="display:grid;grid-template-columns:2fr 1.3fr;gap:16px;">
+        <div style="background:#020617;border-radius:16px;border:1px solid #1f2937;padding:12px 14px;">
+          <label style="font-size:12px;">Question (English)</label><br/>
+          <textarea name="stem_en" rows="3" style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;margin-bottom:8px;">{{ question.stem_en or '' }}</textarea>
+          <label style="font-size:12px;">السؤال (Arabic)</label><br/>
+          <textarea name="stem_ar" rows="3" style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;margin-bottom:8px;">{{ question.stem_ar or '' }}</textarea>
+
+          <label style="font-size:12px;">Answer (English)</label><br/>
+          <input type="text" name="answer_en" value="{{ question.answer_en or "" }}" style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;margin-bottom:8px;">
+          <label style="font-size:12px;">الإجابة (Arabic)</label><br/>
+          <input type="text" name="answer_ar" value="{{ question.answer_ar or "" }}" style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;margin-bottom:8px;">
+
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;font-size:12px;">
+            <div>
+              <label>Type</label><br/>
+              <select name="question_type" style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
+                {% for t in ['text','picture','audio','video','youtube','logo'] %}
+                <option value="{{ t }}" {% if question.question_type == t %}selected{% endif %}>{{ t }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div>
+              <label>Answer type</label><br/>
+              <select name="answer_type" style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
+                <option value="mcq_selection" {% if question.answer_type == 'mcq_selection' %}selected{% endif %}>MCQ</option>
+                <option value="text_input" {% if question.answer_type == 'text_input' %}selected{% endif %}>Text input</option>
+              </select>
+            </div>
+            <div>
+              <label>Difficulty</label><br/>
+              <select name="difficulty" style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
+                {% for d in ['easy','medium','hard','expert'] %}
+                <option value="{{ d }}" {% if question.difficulty == d %}selected{% endif %}>{{ d }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div>
+              <label>Region</label><br/>
+              <select name="region" style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
+                {% for r in ['saudi','global','mixed'] %}
+                <option value="{{ r }}" {% if question.region == r %}selected{% endif %}>{{ r }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;font-size:12px;margin-top:8px;">
+            <div>
+              <label>Status</label><br/>
+              <select name="status" style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
+                {% for s in ['draft','active','archived'] %}
+                <option value="{{ s }}" {% if question.status == s %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <h3 style="margin-top:16px;margin-bottom:6px;font-size:14px;">MCQ options</h3>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;font-size:12px;">
+            <div>
+              <label>Option 1 (EN)</label>
+              <input type="text" name="option1_en" value="{{ question.option1_en or "" }}" style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;margin-bottom:4px;">
+              <label>Option 1 (AR)</label>
+              <input type="text" name="option1_ar" value="{{ question.option1_ar or "" }}" style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
+            </div>
+            <div>
+              <label>Option 2 (EN)</label>
+              <input type="text" name="option2_en" value="{{ question.option2_en or "" }}" style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;margin-bottom:4px;">
+              <label>Option 2 (AR)</label>
+              <input type="text" name="option2_ar" value="{{ question.option2_ar or "" }}" style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
+            </div>
+            <div>
+              <label>Option 3 (EN)</label>
+              <input type="text" name="option3_en" value="{{ question.option3_en or "" }}" style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;margin-bottom:4px;">
+              <label>Option 3 (AR)</label>
+              <input type="text" name="option3_ar" value="{{ question.option3_ar or "" }}" style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
+            </div>
+            <div>
+              <label>Option 4 (EN)</label>
+              <input type="text" name="option4_en" value="{{ question.option4_en or "" }}" style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;margin-bottom:4px;">
+              <label>Option 4 (AR)</label>
+              <input type="text" name="option4_ar" value="{{ question.option4_ar or "" }}" style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
+            </div>
+          </div>
+
+          <div style="margin-top:8px;font-size:12px;">
+            <label>Correct option index (0–3)</label><br/>
+            <input type="number" name="correct_option_index" min="0" max="3" value="{{ question.correct_option_index if question.correct_option_index is not none else '' }}"
+                   style="width:80px;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
+          </div>
+
+          <button type="submit" style="margin-top:16px;padding:8px 16px;border-radius:999px;border:none;background:#eab308;color:#111827;font-weight:600;">Save</button>
+        </div>
+
+        <div style="background:#020617;border-radius:16px;border:1px solid #1f2937;padding:12px 14px;">
+          <h2 style="margin-top:0;margin-bottom:8px;font-size:16px;">Media</h2>
+          <label style="font-size:12px;">Final media URL</label><br/>
+          <input type="text" name="final_media_url" value="{{ question.url or '' }}"
+                 style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;margin-bottom:6px;">
+          <span style="font-size:11px;color:#6b7280;">Override with direct URL (CDN etc.).</span><br/><br/>
+
+          <label style="font-size:12px;">Or upload media</label><br/>
+          <input type="file" name="upload_media" style="margin-top:4px;margin-bottom:6px;font-size:11px;color:#e5e7eb;">
+          <span style="font-size:11px;color:#6b7280;">Uploaded files are stored locally and override the URL.</span>
+
+          <!-- {% if hint_text %}
+          <div style="margin-top:10px;padding:8px;border-radius:10px;border:1px dashed #374151;font-size:11px;color:#9ca3af;">
+            <strong>AI media hint:</strong><br/>{{ hint_text }}
+          </div>
+          {% endif %} -->
+
+          <h3 style="margin-top:14px;margin-bottom:6px;font-size:14px;">AI candidates</h3>
+          {% if candidates %}
+          <div style="max-height:420px;overflow-y:auto;border-radius:12px;border:1px solid #111827;padding:6px;">
+            {% for c in candidates %}
+            <label style="display:block;margin-bottom:8px;border-radius:10px;background:#020617;border:1px solid #1f2937;padding:6px 6px 8px 6px;">
+              <div style="display:flex;align-items:center;margin-bottom:4px;font-size:11px;">
+                <input type="radio" name="selected_candidate_id" value="{{ c.id }}" {% if question.url == c.url %}checked{% endif %} style="margin-right:6px;">
+                <span>{{ c.source }} · score {{ '%.2f' % c.score }}</span>
+              </div>
+              {% if question.question_type in ['picture','logo'] %}
+                <img src="{{ c.url }}" style="width:100%;border-radius:8px;display:block;">
+              {% else %}
+                <div style="font-size:11px;color:#9ca3af;word-break:break-all;">{{ c.url }}</div>
+              {% endif %}
+            </label>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p style="font-size:12px;color:#6b7280;">No AI media suggestions yet. Run the media agent.</p>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+  </body>
+</html>
+
+{% endblock %}

@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+jinja2
+sqlalchemy
+python-dotenv
+openai
+python-multipart
+requests>=2.31.0

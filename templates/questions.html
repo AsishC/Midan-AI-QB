@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+<table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead>
+          <tr style="text-align:left;color:#9ca3af;border-bottom:1px solid #1f2937;">
+            <th style="padding:8px;">ID</th>
+            <th style="padding:8px;">Question (EN / AR)</th>
+            <th style="padding:8px;">Type</th>
+            <th style="padding:8px;">Diff</th>
+            <th style="padding:8px;">Region</th>
+            <th style="padding:8px;">Media</th>
+            <th style="padding:8px;">Status</th>
+            <th style="padding:8px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for q in questions %}
+          <tr style="border-bottom:1px solid #111827;vertical-align:top;">
+            <td style="padding:8px;">#{{ q.id }}</td>
+            <td style="padding:8px;max-width:440px;">
+              <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" dir="rtl">
+                {{ q.stem_ar if q.stem_ar else q.stem_en }}
+              </div>
+              {% if q.stem_en %}
+              <div style="font-size:11px;color:#9ca3af;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;">
+                {{ q.stem_en }}
+            {% if q.answer_ar or q.answer_en %}
+              <div style="color:#3bd671; margin-top:6px; font-weight:600; direction:rtl; text-align:right;">
+                الإجابة: {{ q.answer_ar if q.answer_ar else q.answer_en }}
+                {% if q.answer_ar and q.answer_en %}<span style="color:#9ca3af; margin-left:10px; direction:ltr; display:inline-block;">EN: {{ q.answer_en }}</span>{% endif %}
+              </div>
+            {% endif %}
+              </div>
+              {% endif %}
+              {% if q.answer_en %}
+              <div style="font-size:11px;color:#22c55e;margin-top:4px;">
+              </div>
+              {% endif %}
+            </td>
+            <td style="padding:8px;">{{ q.question_type }}</td>
+            <td style="padding:8px;">{{ q.difficulty }}</td>
+            <td style="padding:8px;">{{ q.region }}</td>
+            <td style="padding:8px;">
+              {% if q.url %}
+                <span style="color:#22c55e;font-size:11px;">Approved</span>
+              {% else %}
+                <span style="color:#f97316;font-size:11px;">
+                  {% if q.media_status == 'PENDING' %}Pending{% elif q.media_status == 'REVIEW_REQUIRED' %}Review{% else %}-{% endif %}
+                </span>
+              {% endif %}
+            </td>
+            <td style="padding:8px;">{{ q.status }}</td>
+            <td style="padding:8px;">
+              <a href="/questions/{{ q.id }}/edit" style="color:#eab308;">Edit</a>
+            </td>
+          </tr>
+          {% endfor %}
+          {% if not questions %}
+          <tr><td colspan="8" style="padding:12px;color:#6b7280;">No questions yet.</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+{% endblock %}

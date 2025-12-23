@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2 style="margin:0 0 12px 0;font-size:18px;">All Questions</h2>
+  <p style="margin:0 0 14px 0;font-size:13px;color:#9ca3af;">All questions across categories (latest first).</p>
+
+  <table style="width:100%;border-collapse:collapse;font-size:12px;">
+    <thead>
+      <tr style="text-align:left;color:#9ca3af;border-bottom:1px solid #1f2937;">
+        <th style="padding:8px;">ID</th>
+        <th style="padding:8px;">Category</th>
+        <th style="padding:8px;">Question (EN)</th>
+        <th style="padding:8px;">Type</th>
+        <th style="padding:8px;">Diff</th>
+        <th style="padding:8px;">Status</th>
+        <th style="padding:8px;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr style="border-bottom:1px solid #111827;vertical-align:top;">
+        <td style="padding:8px;">#{{ row.q.id }}</td>
+        <td style="padding:8px;">{{ row.category_name }}</td>
+        <td style="padding:8px;max-width:520px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ row.q.stem_en }}</td>
+        <td style="padding:8px;">{{ row.q.question_type }}</td>
+        <td style="padding:8px;">{{ row.q.difficulty }}</td>
+        <td style="padding:8px;">{{ row.q.status }}</td>
+        <td style="padding:8px;"><a href="/questions/{{ row.q.id }}/edit" style="color:#eab308;">Edit</a></td>
+      </tr>
+      {% endfor %}
+      {% if not rows %}
+      <tr><td colspan="7" style="padding:12px;color:#6b7280;">No questions yet.</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+{% endblock %}

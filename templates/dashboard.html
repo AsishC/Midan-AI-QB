@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block content %}
+<section style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:20px;">
+        <div style="padding:12px;border-radius:16px;background:#0b1120;border:1px solid #1f2937;">
+          <div style="font-size:11px;color:#9ca3af;">Total questions</div>
+          <div style="font-size:22px;font-weight:600;margin-top:4px;">{{ total_questions }}</div>
+        </div>
+        <div style="padding:12px;border-radius:16px;background:#0b1120;border:1px solid #1f2937;">
+          <div style="font-size:11px;color:#9ca3af;">Active questions</div>
+          <div style="font-size:22px;font-weight:600;margin-top:4px;">{{ active_questions }}</div>
+        </div>
+        <div style="padding:12px;border-radius:16px;background:#0b1120;border:1px solid #1f2937;">
+          <div style="font-size:11px;color:#9ca3af;">Media pending</div>
+          <div style="font-size:22px;font-weight:600;margin-top:4px;">{{ pending_media }}</div>
+        </div>
+        <div style="padding:12px;border-radius:16px;background:#0b1120;border:1px solid #1f2937;">
+          <div style="font-size:11px;color:#9ca3af;">Media review</div>
+          <div style="font-size:22px;font-weight:600;margin-top:4px;">{{ review_media }}</div>
+        </div>
+        <div style="padding:12px;border-radius:16px;background:#0b1120;border:1px solid #1f2937;">
+          <div style="font-size:11px;color:#9ca3af;">Media approved</div>
+          <div style="font-size:22px;font-weight:600;margin-top:4px;">{{ approved_media }}</div>
+        </div>
+      </section>
+
+      <section style="margin-top:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <h2 style="margin:0;font-size:16px;">Categories overview</h2>
+          <a href="/categories" style="font-size:12px;color:#eab308;">Manage categories →</a>
+        </div>
+
+        {% if cat_stats %}
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead>
+            <tr style="text-align:left;color:#9ca3af;border-bottom:1px solid #1f2937;">
+              <th style="padding:8px;">Category</th>
+              <th style="padding:8px;">Scope</th>
+              <th style="padding:8px;">Questions</th>
+              <th style="padding:8px;">Active</th>
+              <th style="padding:8px;">Draft</th>
+              <th style="padding:8px;">Media ✓</th>
+              <th style="padding:8px;">Media pending</th>
+              <th style="padding:8px;">Media review</th>
+              <th style="padding:8px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in cat_stats %}
+            <tr style="border-bottom:1px solid #111827;">
+              <td style="padding:8px;">
+                <strong>{{ c.name_en }}</strong><br/>
+                <span style="color:#9ca3af;">{{ c.name_ar }}</span>
+              </td>
+              <td style="padding:8px;">
+                {% if c.scope == 'saudi' %}
+                  Saudi
+                {% elif c.scope == 'global' %}
+                  Global
+                {% else %}
+                  Mixed ({{ '%0.0f' % (c.saudi_ratio * 100) }}% Saudi)
+                {% endif %}
+              </td>
+              <td style="padding:8px;">{{ c.total }}</td>
+              <td style="padding:8px;">{{ c.active }}</td>
+              <td style="padding:8px;">{{ c.draft }}</td>
+              <td style="padding:8px;">{{ c.media_approved }}</td>
+              <td style="padding:8px;">{{ c.media_pending }}</td>
+              <td style="padding:8px;">{{ c.media_review }}</td>
+              <td style="padding:8px;">
+                <a href="/categories/{{ c.id }}/questions" style="color:#60a5fa;margin-right:6px;">Questions</a>
+                <a href="/categories/{{ c.id }}/edit" style="color:#eab308;">Edit</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <p style="font-size:13px;color:#6b7280;">No categories yet. <a href="/categories/new" style="color:#eab308;">Create one</a>.</p>
+        {% endif %}
+      </section>
+{% endblock %}
+  <div style="margin-top:28px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <h3 style="margin:0;">Recent activity</h3>
+      <div style="opacity:0.7;font-size:13px;">Audit &amp; Governance</div>
+    </div>
+    <div class="tablewrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th style="width:160px;">Time</th>
+            <th style="width:110px;">Entity</th>
+            <th style="width:90px;">ID</th>
+            <th>Message</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for l in logs %}
+          <tr>
+            <td style="opacity:.8;">{{ l.created_at }}</td>
+            <td>{{ l.entity }}</td>
+            <td>{{ l.entity_id or "" }}</td>
+            <td style="opacity:.9;">{{ l.message }}</td>
+          </tr>
+          {% endfor %}
+          {% if logs|length == 0 %}
+          <tr><td colspan="4" style="opacity:.7;">No audit events yet.</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+

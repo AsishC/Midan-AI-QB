@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>{{ title if title else "Midan Platinum" }}</title>
+
+    <style>
+      a { text-decoration: none; }
+      a:hover { text-decoration: underline; }
+
+      /* Table */
+      table.midan-table {
+        width:100%;
+        border-collapse:collapse;
+        background:#0b1220;
+        border:1px solid #111827;
+        border-radius:12px;
+        overflow:hidden;
+      }
+      table.midan-table th {
+        text-align:left;
+        font-size:12px;
+        color:#9ca3af;
+        padding:10px 8px;
+        border-bottom:1px solid #111827;
+      }
+      table.midan-table td {
+        padding:10px 8px;
+        border-bottom:1px solid #111827;
+        vertical-align:top;
+      }
+
+      /* Question card in list view */
+      .question-cell { max-width: 560px; }
+      .q-card { display:flex; flex-direction:column; gap:6px; }
+      .q-en { font-weight:500; line-height:1.4; }
+      .q-ar {
+        direction:rtl;
+        unicode-bidi:plaintext;
+        font-size:13px;
+        color:#c7d2fe;
+        line-height:1.5;
+      }
+      .q-answer { margin-top:4px; color:#6ee7b7; font-size:12px; }
+      .q-answer span { color:#9ca3af; }
+
+      /* Small pills */
+      .pill {
+        display:inline-block;
+        padding:2px 8px;
+        border-radius:999px;
+        font-size:12px;
+        border:1px solid #111827;
+        background:#0f172a;
+        color:#e5e7eb;
+      }
+      .pill-ok { color:#34d399; }
+      .pill-warn { color:#fbbf24; }
+    </style>
+  </head>
+
+  <body style="background:#020617;color:#e5e7eb;font-family:-apple-system,system-ui;">
+    <div style="max-width:1120px;margin:24px auto;padding:12px 16px;">
+      <header style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+        <div>
+          <h1 style="margin:0;font-size:24px;">Midan Platinum</h1>
+          <p style="margin:4px 0 0 0;font-size:13px;color:#9ca3af;">Question Bank · AI Engine · Media Moderation</p>
+        </div>
+        <nav style="font-size:13px;">
+          <a href="/" style="color:#e5e7eb;margin-right:12px;">Dashboard</a>
+          <a href="/categories" style="color:#e5e7eb;margin-right:12px;">Categories</a>
+          <a href="/questions" style="color:#e5e7eb;margin-right:12px;">Questions</a>
+          <a href="/ai/generate" style="color:#e5e7eb;margin-right:12px;">AI Generate</a>
+          <a href="/agents" style="color:#e5e7eb;margin-right:12px;">Agents</a>
+          <a href="/export" style="color:#e5e7eb;">Export</a>
+        </nav>
+      </header>
+
+      {% block content %}{% endblock %}
+
+      <footer style="margin-top:28px;padding-top:14px;border-top:1px solid #111827;color:#9ca3af;font-size:12px;display:flex;justify-content:space-between;">
+        <div>{{ APP_VERSION }}</div>
+        <div>Audit & Governance Enabled</div>
+      </footer>
+    </div>
+  </body>
+</html>

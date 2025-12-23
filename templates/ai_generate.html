@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block content %}
+{% if message %}
+      <div style="margin-bottom:12px;padding:8px 10px;border-radius:10px;border:1px solid #14532d;background:#022c22;font-size:12px;color:#bbf7d0;">
+        {{ message }}
+      </div>
+      {% endif %}
+
+      <form method="post" action="/ai/generate" style="background:#020617;border-radius:16px;border:1px solid #1f2937;padding:12px 14px;">
+        <label style="font-size:12px;">Category</label><br/>
+        <select id="category_id" name="category_id" style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;margin-bottom:6px;">
+          {% for c in categories %}
+          <option value="{{ c.id }}">{{ c.name_en }} / {{ c.name_ar }} · scope: {{ c.scope }}</option>
+          {% endfor %}
+        </select>
+        <span style="font-size:11px;color:#6b7280;">Scope (Saudi / Global / Mixed) is taken from the category settings.</span><br/><br/>
+
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;font-size:12px;">
+          <div>
+            <label>Difficulty</label><br/>
+            <select name="difficulty" style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
+              <option value="easy">Easy</option>
+              <option value="medium" selected>Medium</option>
+              <option value="hard">Hard</option>
+              <option value="expert">Expert</option>
+            </select>
+          </div>
+          <div>
+            <label>Question type</label><br/>
+            <select name="question_type" style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
+              <option value="text">Text</option>
+              <option value="picture">Picture</option>
+              <option value="audio">Audio</option>
+              <option value="video">Video</option>
+              <option value="youtube">YouTube</option>
+              <option value="logo">Logo</option>
+            </select>
+          </div>
+          <div>
+            <label>Answer type</label><br/>
+            <select name="answer_type" style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
+              <option value="mcq_selection" selected>MCQ</option>
+              <option value="text_input">Text input</option>
+            </select>
+          </div>
+        </div><br/>
+
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;font-size:12px;">
+          <div>
+            <label>Count</label><br/>
+            <input type="number" name="count" value="20" min="1" max="200"
+                   style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
+          </div>
+        
+  <div>
+    <label>Subtopic (optional)</label><br/>
+    <input id="subtopic" type="text" name="subtopic" value="" placeholder="Auto-suggested; you can edit"
+           style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
+    <div id="subtopic_suggestions" style="margin-top:6px;font-size:11px;color:#6b7280;"></div>
+  </div>
+</div><br/>
+
+<label style="font-size:12px;">Hint (optional)</label><br/>
+<textarea name="hint" rows="2" placeholder="Optional prompt/constraint to narrow the question"
+          style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;margin-bottom:10px;"></textarea>
+
+<button type="submit"
+ style="padding:8px 16px;border-radius:999px;border:none;background:#eab308;color:#111827;font-weight:600;">Generate</button>
+      </form>
+{% endblock %}
