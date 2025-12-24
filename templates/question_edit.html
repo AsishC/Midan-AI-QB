@@ -10,7 +10,7 @@
       <h1 style="margin:4px 0 12px 0;font-size:22px;">Edit Question #{{ question.id }}</h1>
 
       <form method="post" enctype="multipart/form-data" style="display:grid;grid-template-columns:2fr 1.3fr;gap:16px;">
-    <input type="hidden" name="category_id" value="{{ q.category_id }}">
+    <input type="hidden" name="category_id" value="{{ question.category_id }}">
 
         <div style="background:#020617;border-radius:16px;border:1px solid #1f2937;padding:12px 14px;">
           <label style="font-size:12px;">Question (English)</label><br/>
