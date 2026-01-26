@@ -7,18 +7,8 @@ from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./midan.db")
 
-# Render (and some providers) may provide postgres:// which SQLAlchemy won't accept in some setups
-if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg2://", 1)
-
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
-
-engine = create_engine(
-    DATABASE_URL,
-    connect_args=connect_args,
-    pool_pre_ping=True,     # prevents stale connections on Render
-)
-
+engine = create_engine(DATABASE_URL, connect_args=connect_args)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
@@ -29,28 +19,27 @@ class Category(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    # Arabic is mandatory/primary; EN is optional
-    name_ar = Column(String(120), nullable=False)
+    # Arabic-first UX, but allow EN-only categories.
+    # Validation in app layer enforces: at least one of name_ar or name_en must be provided.
+    name_ar = Column(String(120), nullable=True)
     name_en = Column(String(120), nullable=True)
 
-    # Optional metadata / UX fields
     description_ar = Column(Text, nullable=True)
     description_en = Column(Text, nullable=True)
-    saudi_safe_notes = Column(Text, nullable=True)  # optional safety/context notes for Saudi content
-    scope = Column(String(20), default="saudi")  # saudi/global/mixed
-    saudi_ratio = Column(Float, default=1.0)  # 0..1
-    subtopic = Column(String(120), nullable=True)
-    default_difficulty = Column(String(20), default="medium")  # easy/medium/hard/expert
-    sensitivity_level = Column(String(20), default="general")  # general/royal
-    dedup_key = Column(String(80), nullable=True, index=True)  # hash for de-dup
 
-    is_current_affairs = Column(Boolean, default=False)
+    # Optional default subtopic seed (AI can suggest; human can override)
+    subtopic = Column(String(120), nullable=True)
+
+    # Used for dedupe / category identity (optional)
+    dedup_key = Column(String(80), nullable=True, index=True)
+
     created_at = Column(DateTime, default=datetime.utcnow)
 
     questions = relationship("Question", back_populates="category", cascade="all, delete-orphan")
 
 
 class Question(Base):
+
     __tablename__ = "questions"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -69,7 +58,22 @@ class Question(Base):
     difficulty = Column(String(20), default="medium")  # easy/medium/hard/expert
     question_type = Column(String(20), default="text")  # text/picture/audio/video/logo
     answer_type = Column(String(30), default="mcq_selection")  # mcq_selection/text
+    # Generation mode: TEXT (no media required) vs MEDIA (question depends on media)
+    question_mode = Column(String(10), default="TEXT")  # TEXT/MEDIA
+    # Media type when question_mode == MEDIA
+    media_type = Column(String(20), nullable=True)  # logo/picture/audio/video/youtube
+    # Internal control JSON for media-first generation
+    media_intent_json = Column(Text, nullable=True)
+
+    # Media agent compatibility fields
+    media_query = Column(Text, nullable=True)
+    media_url = Column(Text, nullable=True)
+    media_selected_source = Column(String(50), nullable=True)
+    media_selected_score = Column(String(20), nullable=True)
+
     region = Column(String(20), default="saudi")  # saudi/global/mixed
+
+    saudi_ratio = Column(Float, default=1.0)  # 0..1 (local vs global bias)
 
     status = Column(String(20), default="draft")  # draft/active
     media_status = Column(String(30), default="PENDING")  # PENDING/REVIEW_REQUIRED/APPROVED
@@ -92,7 +96,7 @@ class Question(Base):
     option3_ar = Column(Text, nullable=True)
     option4_ar = Column(Text, nullable=True)
 
-    correct_option_index = Column(Integer, nullable=True)  # 1..4
+    correct_option_index = Column(Integer, nullable=True)  # 0..3 (UI uses 0-3; display labels may show 1-4)
 
     # Final media URL (chosen/suggested)
     url = Column(Text, nullable=True)
@@ -159,14 +163,8 @@ def ensure_schema() -> None:
                 "name_en": "name_en VARCHAR(120)",
                 "description_ar": "description_ar TEXT",
                 "description_en": "description_en TEXT",
-                "saudi_safe_notes": "saudi_safe_notes TEXT",
-                "scope": "scope VARCHAR(20) DEFAULT 'saudi'",
-                "saudi_ratio": "saudi_ratio FLOAT DEFAULT 1.0",
                 "subtopic": "subtopic VARCHAR(120)",
-                "default_difficulty": "default_difficulty VARCHAR(20) DEFAULT 'medium'",
-                "sensitivity_level": "sensitivity_level VARCHAR(20) DEFAULT 'general'",
                 "dedup_key": "dedup_key VARCHAR(80)",
-                "is_current_affairs": "is_current_affairs BOOLEAN DEFAULT 0",
                 "created_at": "created_at DATETIME",
             }
             for name, ddl in needed.items():
@@ -186,7 +184,10 @@ def ensure_schema() -> None:
                 "difficulty": "difficulty VARCHAR(20) DEFAULT 'medium'",
                 "question_type": "question_type VARCHAR(20) DEFAULT 'text'",
                 "answer_type": "answer_type VARCHAR(30) DEFAULT 'mcq_selection'",
+                "question_mode": "question_mode VARCHAR(10)",
+                "media_intent_json": "media_intent_json TEXT",
                 "region": "region VARCHAR(20) DEFAULT 'saudi'",
+                "saudi_ratio": "saudi_ratio FLOAT DEFAULT 1.0",
                 "status": "status VARCHAR(20) DEFAULT 'draft'",
                 "media_status": "media_status VARCHAR(30) DEFAULT 'PENDING'",
                 "media_confidence": "media_confidence FLOAT DEFAULT 0.0",
