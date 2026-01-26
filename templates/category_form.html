@@ -1,83 +1,75 @@
 {% extends "base.html" %}
 {% block content %}
 
-<!doctype html>
-<html>
-  <head><meta charset="utf-8"><title>{% if category %}Edit{% else %}New{% endif %} Category – Midan QB</title></head>
-  <body style="background:#020617;color:#e5e7eb;font-family:-apple-system,system-ui;">
-    <div style="max-width:640px;margin:24px auto;padding:16px 18px;">
-      <a href="/categories" style="font-size:12px;color:#9ca3af;">← Back to categories</a>
-      <h1 style="margin:8px 0 16px 0;font-size:22px;">{% if category %}Edit{% else %}New{% endif %} Category</h1>
+<h2 style="margin:0 0 10px 0;">{{ title }}</h2>
+<p style="margin:0 0 18px 0;color:#9ca3af;">
+  Provide the category name in <b>Arabic</b> and/or <b>English</b>. Arabic is the primary UX language, but English-only categories are allowed.
+</p>
 
-      <form method="post" style="background:#020617;border-radius:16px;border:1px solid #1f2937;padding:12px 14px;">
-        <label style="font-size:12px;">Name (English)</label><br/>
-        <input type="text" name="name_en" value="{{ category.name_en if category else '' }}" required
-               style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;margin-bottom:8px;">
-        <label style="font-size:12px;">Name (Arabic)</label><br/>
-        <input type="text" name="name_ar" value="{{ category.name_ar if category else '' }}"
-               style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;margin-bottom:8px;">
-
-        <label style="font-size:12px;">Description (EN)</label><br/>
-        <textarea name="description_en" rows="2"
-               style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;margin-bottom:8px;">{{ category.description_en if category else '' }}</textarea>
-        <label style="font-size:12px;">Description (AR)</label><br/>
-        <textarea name="description_ar" rows="2"
-               style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;margin-bottom:8px;">{{ category.description_ar if category else '' }}</textarea>
-
-        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;">
-          <div>
-            <label style="font-size:12px;">Scope</label><br/>
-            <select name="scope" style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
-              <option value="saudi" {% if category and category.scope == 'saudi' %}selected{% endif %}>Saudi</option>
-              <option value="global" {% if category and category.scope == 'global' %}selected{% endif %}>Global</option>
-              <option value="mixed" {% if category and category.scope == 'mixed' %}selected{% endif %}>Mixed</option>
-            </select>
-          </div>
-          <div>
-            <label style="font-size:12px;">Saudi ratio (for mixed)</label><br/>
-            <input type="number" name="saudi_ratio" step="0.05" min="0" max="1"
-                   value="{{ category.saudi_ratio if category else 0.7 }}"
-                   style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
-          </div>
-        </div>
-
-        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px;">
-  <div>
-    <label style="font-size:12px;">Default Difficulty</label><br/>
-    <select name="default_difficulty" style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
-      {% for d in ['easy','medium','hard','expert'] %}
-      <option value="{{ d }}" {% if category and category.default_difficulty==d %}selected{% endif %}>{{ d }}</option>
-      {% endfor %}
-    </select>
-  </div>
-  <div>
-    <label style="font-size:12px;">Subtopic (optional)</label><br/>
-    <input type="text" name="subtopic" value="{{ category.subtopic if category else '' }}"
-           style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
-  </div>
-</div>
-
-<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px;">
-  <div>
-    <label style="font-size:12px;">Sensitivity</label><br/>
-    <select name="sensitivity_level" style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
-      <option value="general" {% if category and category.sensitivity_level=='general' %}selected{% endif %}>general</option>
-      <option value="royal" {% if category and category.sensitivity_level=='royal' %}selected{% endif %}>royal</option>
-    </select>
-  </div>
-  <div>
-    <label style="font-size:12px;">Current affairs category</label><br/>
-    <select name="is_current_affairs" style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
-      <option value="0" {% if category and not category.is_current_affairs %}selected{% endif %}>No</option>
-      <option value="1" {% if category and category.is_current_affairs %}selected{% endif %}>Yes</option>
-    </select>
-  </div>
-</div>
-
-        <button type="submit" style="margin-top:16px;padding:8px 16px;border-radius:999px;border:none;background:#eab308;color:#111827;font-weight:600;">Save</button>
-      </form>
+<form method="post" style="max-width:1100px;">
+  <div class="midan-grid2">
+    <div class="midan-field">
+      <label class="midan-label">Category Name (AR)</label>
+      <input class="midan-input" name="name_ar" id="cat_name_ar" value="{{ category.name_ar or '' }}" placeholder="Arabic name">
     </div>
-  </body>
-</html>
+    <div class="midan-field">
+      <label class="midan-label">Category Name (EN)</label>
+      <input class="midan-input" name="name_en" id="cat_name_en" value="{{ category.name_en or '' }}" placeholder="English name">
+    </div>
+  </div>
+
+  <div class="midan-grid2 midan-rowgap">
+    <div class="midan-field">
+      <label class="midan-label">Description (AR)</label>
+      <textarea class="midan-input" name="description_ar" rows="3" placeholder="Arabic description">{{ category.description_ar or '' }}</textarea>
+    </div>
+    <div class="midan-field">
+      <label class="midan-label">Description (EN)</label>
+      <textarea class="midan-input" name="description_en" rows="3" placeholder="English description">{{ category.description_en or '' }}</textarea>
+    </div>
+  </div>
+
+  <div class="midan-field midan-rowgap">
+    <label class="midan-label">Default Subtopic (optional)</label>
+    <input class="midan-input" name="subtopic" id="cat_subtopic" list="cat_subtopic_suggestions"
+           value="{{ category.subtopic or '' }}" placeholder="Optional seed subtopic">
+    <datalist id="cat_subtopic_suggestions"></datalist>
+    <div class="midan-help">
+      This is a seed value only. Actual generation uses <b>Subtopic + Hint + Difficulty</b> on the question level.
+    </div>
+  </div>
+
+  <button class="btn" type="submit">Save</button>
+  <a class="muted" href="/categories" style="margin-left:10px;">Cancel</a>
+</form>
+
+<script>
+(function(){
+  async function suggest(){
+    const en = (document.getElementById('cat_name_en')||{}).value || '';
+    const ar = (document.getElementById('cat_name_ar')||{}).value || '';
+    const dl = document.getElementById('cat_subtopic_suggestions');
+    if(!dl) return;
+    dl.innerHTML = '';
+    const q = (en || ar).trim();
+    if(!q) return;
+    try{
+      const r = await fetch('/api/subtopics/suggest?topic=' + encodeURIComponent(q));
+      const data = await r.json();
+      (data.items||[]).slice(0,12).forEach(t=>{
+        const opt = document.createElement('option');
+        opt.value = t;
+        dl.appendChild(opt);
+      });
+    }catch(e){}
+  }
+  const enEl=document.getElementById('cat_name_en');
+  const arEl=document.getElementById('cat_name_ar');
+  if(enEl) enEl.addEventListener('blur', suggest);
+  if(arEl) arEl.addEventListener('blur', suggest);
+  // initial
+  suggest();
+})();
+</script>
 
 {% endblock %}

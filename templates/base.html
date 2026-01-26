@@ -5,7 +5,20 @@
     <title>{{ title if title else "Midan Platinum" }}</title>
 
     <style>
-      a { text-decoration: none; }
+/* Layout helpers */
+.midan-field{margin-bottom:16px;}
+.midan-help{color:#9ca3af;font-size:12px;margin-top:6px;}
+input.midan-input, textarea.midan-input, select.midan-input{width:100%;padding:10px 12px;border-radius:12px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;box-sizing:border-box;}
+label.midan-label{display:block;margin-bottom:6px;font-size:12px;color:#cbd5e1;}
+.midan-rowgap{margin-top:14px;}
+
+.midan-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.midan-grid3 { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:14px; }
+.midan-grid4 { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px; }
+@media (max-width: 900px) {
+  .midan-grid2, .midan-grid3, .midan-grid4 { grid-template-columns:1fr !important; }
+}
+a { text-decoration: none; }
       a:hover { text-decoration: underline; }
 
       /* Table */

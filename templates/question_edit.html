@@ -1,150 +1,236 @@
 {% extends "base.html" %}
+{% set q = question %}
 {% block content %}
+<div style="max-width:1120px;margin:24px auto;padding:12px 16px;">
+  <a href="/categories/{{ q.category_id }}/questions" style="font-size:12px;color:#9ca3af;">← Back to questions</a>
+  <h1 style="margin:6px 0 14px 0;font-size:22px;">Edit Question #{{ q.id }}</h1>
 
-<!doctype html>
-<html>
-  <head><meta charset="utf-8"><title>Edit Question #{{ question.id }}</title></head>
-  <body style="background:#020617;color:#e5e7eb;font-family:-apple-system,system-ui;">
-    <div style="max-width:1120px;margin:24px auto;padding:12px 16px;">
-      <a href="/categories/{{ question.category_id }}/questions" style="font-size:12px;color:#9ca3af;">← Back to questions</a>
-      <h1 style="margin:4px 0 12px 0;font-size:22px;">Edit Question #{{ question.id }}</h1>
+  <form method="post" enctype="multipart/form-data" class="midan-grid2">
+    <input type="hidden" name="category_id" value="{{ q.category_id }}">
 
-      <form method="post" enctype="multipart/form-data" style="display:grid;grid-template-columns:2fr 1.3fr;gap:16px;">
-         <input type="hidden" name="category_id" value="{{ question.category_id }}">
-        <div style="background:#020617;border-radius:16px;border:1px solid #1f2937;padding:12px 14px;">
-          <label style="font-size:12px;">Question (English)</label><br/>
-          <textarea name="stem_en" rows="3" style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;margin-bottom:8px;">{{ question.stem_en or '' }}</textarea>
-          <label style="font-size:12px;">السؤال (Arabic)</label><br/>
-          <textarea name="stem_ar" rows="3" style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;margin-bottom:8px;">{{ question.stem_ar or '' }}</textarea>
+    <!-- LEFT -->
+    <div style="border:1px solid #1f2937;border-radius:16px;padding:14px;background:#0b1220;">
+      <div class="midan-field">
+        <label class="midan-label">Question (English)</label>
+        <textarea class="midan-input" name="stem_en" rows="2">{{ q.stem_en or "" }}</textarea>
+      </div>
 
-          <label style="font-size:12px;">Answer (English)</label><br/>
-          <input type="text" name="answer_en" value="{{ question.answer_en or "" }}" style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;margin-bottom:8px;">
-          <label style="font-size:12px;">الإجابة (Arabic)</label><br/>
-          <input type="text" name="answer_ar" value="{{ question.answer_ar or "" }}" style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;margin-bottom:8px;">
+      <div class="midan-field">
+        <label class="midan-label">السؤال (Arabic)</label>
+        <textarea class="midan-input" name="stem_ar" rows="2">{{ q.stem_ar or "" }}</textarea>
+      </div>
 
-          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;font-size:12px;">
-            <div>
-              <label>Type</label><br/>
-              <select name="question_type" style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
-                {% for t in ['text','picture','audio','video','youtube','logo'] %}
-                <option value="{{ t }}" {% if question.question_type == t %}selected{% endif %}>{{ t }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div>
-              <label>Answer type</label><br/>
-              <select name="answer_type" style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
-                <option value="mcq_selection" {% if question.answer_type == 'mcq_selection' %}selected{% endif %}>MCQ</option>
-                <option value="text_input" {% if question.answer_type == 'text_input' %}selected{% endif %}>Text input</option>
-              </select>
-            </div>
-            <div>
-              <label>Difficulty</label><br/>
-              <select name="difficulty" style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
-                {% for d in ['easy','medium','hard','expert'] %}
-                <option value="{{ d }}" {% if question.difficulty == d %}selected{% endif %}>{{ d }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div>
-              <label>Region</label><br/>
-              <select name="region" style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
-                {% for r in ['saudi','global','mixed'] %}
-                <option value="{{ r }}" {% if question.region == r %}selected{% endif %}>{{ r }}</option>
-                {% endfor %}
-              </select>
-            </div>
-          </div>
+      <div class="midan-field">
+        <label class="midan-label">Answer (English)</label>
+        <input class="midan-input" name="answer_en" value="{{ q.answer_en or '' }}">
+      </div>
 
-          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;font-size:12px;margin-top:8px;">
-            <div>
-              <label>Status</label><br/>
-              <select name="status" style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
-                {% for s in ['draft','active','archived'] %}
-                <option value="{{ s }}" {% if question.status == s %}selected{% endif %}>{{ s }}</option>
-                {% endfor %}
-              </select>
-            </div>
-          </div>
+      <div class="midan-field">
+        <label class="midan-label">الإجابة (Arabic)</label>
+        <input class="midan-input" name="answer_ar" value="{{ q.answer_ar or '' }}">
+      </div>
 
-          <h3 style="margin-top:16px;margin-bottom:6px;font-size:14px;">MCQ options</h3>
-          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;font-size:12px;">
-            <div>
-              <label>Option 1 (EN)</label>
-              <input type="text" name="option1_en" value="{{ question.option1_en or "" }}" style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;margin-bottom:4px;">
-              <label>Option 1 (AR)</label>
-              <input type="text" name="option1_ar" value="{{ question.option1_ar or "" }}" style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
-            </div>
-            <div>
-              <label>Option 2 (EN)</label>
-              <input type="text" name="option2_en" value="{{ question.option2_en or "" }}" style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;margin-bottom:4px;">
-              <label>Option 2 (AR)</label>
-              <input type="text" name="option2_ar" value="{{ question.option2_ar or "" }}" style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
-            </div>
-            <div>
-              <label>Option 3 (EN)</label>
-              <input type="text" name="option3_en" value="{{ question.option3_en or "" }}" style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;margin-bottom:4px;">
-              <label>Option 3 (AR)</label>
-              <input type="text" name="option3_ar" value="{{ question.option3_ar or "" }}" style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
-            </div>
-            <div>
-              <label>Option 4 (EN)</label>
-              <input type="text" name="option4_en" value="{{ question.option4_en or "" }}" style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;margin-bottom:4px;">
-              <label>Option 4 (AR)</label>
-              <input type="text" name="option4_ar" value="{{ question.option4_ar or "" }}" style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
-            </div>
-          </div>
-
-          <div style="margin-top:8px;font-size:12px;">
-            <label>Correct option index (0–3)</label><br/>
-            <input type="number" name="correct_option_index" min="0" max="3" value="{{ question.correct_option_index if question.correct_option_index is not none else '' }}"
-                   style="width:80px;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;">
-          </div>
-
-          <button type="submit" style="margin-top:16px;padding:8px 16px;border-radius:999px;border:none;background:#eab308;color:#111827;font-weight:600;">Save</button>
+      <div class="midan-grid4 midan-field">
+        <div>
+          <label class="midan-label">Type</label>
+          <select class="midan-input" name="question_type">
+            {% for t in ['text','picture','audio','video','youtube','logo'] %}
+            <option value="{{ t }}" {% if q.question_type == t %}selected{% endif %}>{{ t }}</option>
+            {% endfor %}
+          </select>
         </div>
 
-        <div style="background:#020617;border-radius:16px;border:1px solid #1f2937;padding:12px 14px;">
-          <h2 style="margin-top:0;margin-bottom:8px;font-size:16px;">Media</h2>
-          <label style="font-size:12px;">Final media URL</label><br/>
-          <input type="text" name="final_media_url" value="{{ question.url or '' }}"
-                 style="width:100%;padding:6px 8px;border-radius:10px;border:1px solid #1f2937;background:#020617;color:#e5e7eb;margin-bottom:6px;">
-          <span style="font-size:11px;color:#6b7280;">Override with direct URL (CDN etc.).</span><br/><br/>
+        <div>
+          <label class="midan-label">Answer type</label>
+          <select class="midan-input" name="answer_type">
+            <option value="mcq_selection" {% if q.answer_type == 'mcq_selection' %}selected{% endif %}>MCQ</option>
+            <option value="text_input" {% if q.answer_type == 'text_input' %}selected{% endif %}>Text input</option>
+          </select>
+        </div>
 
-          <label style="font-size:12px;">Or upload media</label><br/>
-          <input type="file" name="upload_media" style="margin-top:4px;margin-bottom:6px;font-size:11px;color:#e5e7eb;">
-          <span style="font-size:11px;color:#6b7280;">Uploaded files are stored locally and override the URL.</span>
+        <div>
+          <label class="midan-label">Difficulty</label>
+          <select class="midan-input" name="difficulty">
+            {% for d in ['easy','medium','hard','expert'] %}
+            <option value="{{ d }}" {% if q.difficulty == d %}selected{% endif %}>{{ d }}</option>
+            {% endfor %}
+          </select>
+        </div>
 
-          <!-- {% if hint_text %}
-          <div style="margin-top:10px;padding:8px;border-radius:10px;border:1px dashed #374151;font-size:11px;color:#9ca3af;">
-            <strong>AI media hint:</strong><br/>{{ hint_text }}
+        <div>
+          <label class="midan-label">Region</label>
+          <select class="midan-input" id="region_scope" name="region">
+            {% for r in ['saudi','global','mixed'] %}
+            <option value="{{ r }}" {% if q.region == r %}selected{% endif %}>{{ r }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="midan-grid3 midan-field" style="align-items:end;">
+        <div>
+          <label class="midan-label">Current affairs</label>
+          <select class="midan-input" name="current_affairs">
+            <option value="0" {% if not q.current_affairs %}selected{% endif %}>No</option>
+            <option value="1" {% if q.current_affairs %}selected{% endif %}>Yes</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="midan-label">Status</label>
+          <select class="midan-input" name="status">
+            {% for s in ['draft','active','archived'] %}
+            <option value="{{ s }}" {% if q.status == s %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div id="saudi_ratio_wrap">
+          <label class="midan-label">Saudi ratio (0–1)</label>
+          <input class="midan-input" type="number" step="0.1" min="0" max="1" name="saudi_ratio" value="{{ (q.saudi_ratio if q.saudi_ratio is not none else 1.0) }}">
+        </div>
+      </div>
+
+      <!-- MCQ -->
+      <div id="mcq_wrap" style="margin-top:10px;">
+        <h3 style="margin:10px 0 8px 0;">MCQ options</h3>
+        <div class="midan-grid2">
+          <div>
+            <label class="midan-label">Option 1 (EN)</label>
+            <input class="midan-input" name="option1_en" value="{{ q.option1_en or '' }}">
           </div>
-          {% endif %} -->
+          <div>
+            <label class="midan-label">Option 2 (EN)</label>
+            <input class="midan-input" name="option2_en" value="{{ q.option2_en or '' }}">
+          </div>
+          <div>
+            <label class="midan-label">Option 1 (AR)</label>
+            <input class="midan-input" name="option1_ar" value="{{ q.option1_ar or '' }}">
+          </div>
+          <div>
+            <label class="midan-label">Option 2 (AR)</label>
+            <input class="midan-input" name="option2_ar" value="{{ q.option2_ar or '' }}">
+          </div>
+          <div>
+            <label class="midan-label">Option 3 (EN)</label>
+            <input class="midan-input" name="option3_en" value="{{ q.option3_en or '' }}">
+          </div>
+          <div>
+            <label class="midan-label">Option 4 (EN)</label>
+            <input class="midan-input" name="option4_en" value="{{ q.option4_en or '' }}">
+          </div>
+          <div>
+            <label class="midan-label">Option 3 (AR)</label>
+            <input class="midan-input" name="option3_ar" value="{{ q.option3_ar or '' }}">
+          </div>
+          <div>
+            <label class="midan-label">Option 4 (AR)</label>
+            <input class="midan-input" name="option4_ar" value="{{ q.option4_ar or '' }}">
+          </div>
+        </div>
 
-          <h3 style="margin-top:14px;margin-bottom:6px;font-size:14px;">AI candidates</h3>
-          {% if candidates %}
-          <div style="max-height:420px;overflow-y:auto;border-radius:12px;border:1px solid #111827;padding:6px;">
-            {% for c in candidates %}
-            <label style="display:block;margin-bottom:8px;border-radius:10px;background:#020617;border:1px solid #1f2937;padding:6px 6px 8px 6px;">
-              <div style="display:flex;align-items:center;margin-bottom:4px;font-size:11px;">
-                <input type="radio" name="selected_candidate_id" value="{{ c.id }}" {% if question.url == c.url %}checked{% endif %} style="margin-right:6px;">
+        <div style="margin-top:10px;max-width:260px;">
+          <label class="midan-label">Correct option index (0–3)</label>
+          <input class="midan-input" type="number" min="0" max="3" name="correct_option_index" value="{{ (q.correct_option_index if q.correct_option_index is not none else 0) }}">
+        </div>
+      </div>
+
+      <div style="margin-top:14px;">
+        <button type="submit" style="background:#f4c542;border:none;color:#111827;padding:10px 18px;border-radius:999px;font-weight:700;cursor:pointer;">Save</button>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div style="border:1px solid #1f2937;border-radius:16px;padding:14px;background:#0b1220;">
+      <h3 style="margin:0 0 10px 0;">Media</h3>
+
+      <div class="midan-field">
+        <label class="midan-label">Media status</label>
+        <select class="midan-input" name="media_status">
+          {% for ms in ['PENDING','REVIEW_REQUIRED','APPROVED','REJECTED'] %}
+          <option value="{{ ms }}" {% if q.media_status == ms %}selected{% endif %}>{{ ms }}</option>
+          {% endfor %}
+        </select>
+        <div style="font-size:12px;color:#6b7280;margin-top:4px;">No auto-approval in v15; set APPROVED only after review.</div>
+      </div>
+
+      <div class="midan-field">
+        <label class="midan-label">Final media URL</label>
+        <input class="midan-input" id="final_media_url" name="media_url" value="{{ q.url or '' }}">
+        <div style="font-size:12px;color:#6b7280;margin-top:4px;">Override with direct URL (CDN etc.).</div>
+      </div>
+
+      <div class="midan-field">
+        <label class="midan-label">Or upload media</label>
+        <input class="midan-input" type="file" name="media_file">
+        <div style="font-size:12px;color:#6b7280;margin-top:4px;">Uploaded files are stored locally and override the URL.</div>
+      </div>
+
+      <h3 style="margin:14px 0 8px 0;">AI candidates</h3>
+      {% if candidates %}
+        <div style="max-height:420px;overflow-y:auto;border-radius:12px;border:1px solid #111827;padding:8px;">
+          {% for c in candidates %}
+            <label style="display:block;margin-bottom:10px;border-radius:12px;border:1px solid #1f2937;padding:8px;cursor:pointer;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px;">
+                <input type="radio" name="selected_candidate_id" value="{{ c.id }}" {% if q.url == c.url %}checked{% endif %}>
                 <span>{{ c.source }} · score {{ '%.2f' % c.score }}</span>
               </div>
-              {% if question.question_type in ['picture','logo'] %}
-                <img src="{{ c.url }}" style="width:100%;border-radius:8px;display:block;">
-              {% else %}
-                <div style="font-size:11px;color:#9ca3af;word-break:break-all;">{{ c.url }}</div>
+
+              {% if c.url %}
+                {% if (".jpg" in c.url or ".jpeg" in c.url or ".png" in c.url or "images.pexels.com" in c.url or "upload.wikimedia.org" in c.url or "images.unsplash.com" in c.url) %}
+                  <img src="{{ c.url }}" style="width:100%;border-radius:10px;display:block;border:1px solid #0f172a;">
+                {% else %}
+                  <div style="font-size:12px;color:#9ca3af;word-break:break-all;">{{ c.url }}</div>
+                {% endif %}
               {% endif %}
             </label>
-            {% endfor %}
-          </div>
-          {% else %}
-          <p style="font-size:12px;color:#6b7280;">No AI media suggestions yet. Run the media agent.</p>
-          {% endif %}
+          {% endfor %}
         </div>
-      </form>
+      {% else %}
+        <div style="font-size:12px;color:#6b7280;">No AI media suggestions yet. Run the media agent.</div>
+      {% endif %}
     </div>
-  </body>
-</html>
+  </form>
+</div>
 
+<script>
+(function(){
+  function toggleSaudiRatio(){
+    var region = (document.getElementById('region_scope')||{}).value || '';
+    var wrap = document.getElementById('saudi_ratio_wrap');
+    if(!wrap) return;
+    if(region === 'mixed'){
+      wrap.style.display = '';
+    } else {
+      wrap.style.display = 'none';
+    }
+  }
+  document.addEventListener('change', function(e){
+    if(e.target && e.target.id === 'region_scope'){ toggleSaudiRatio(); }
+  });
+  // when selecting a candidate, copy its url into final_media_url immediately (runtime)
+  document.addEventListener('change', function(e){
+    if(e.target && e.target.name === 'selected_candidate_id'){
+      var radio = e.target;
+      var card = radio.closest('label');
+      if(!card) return;
+      // find img/src or fallback to text
+      var img = card.querySelector('img');
+      var url = img ? img.getAttribute('src') : null;
+      if(!url){
+        // try to find url text inside card
+        var txt = card.innerText || '';
+        // crude extraction: first http(s) link
+        var m = txt.match(/https?:\/\/\S+/);
+        if(m) url = m[0];
+      }
+      if(url){
+        var input = document.getElementById('final_media_url');
+        if(input) input.value = url;
+      }
+    }
+  });
+  toggleSaudiRatio();
+})();
+</script>
 {% endblock %}

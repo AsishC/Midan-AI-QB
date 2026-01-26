@@ -1,5 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
+{% set gen = request.query_params.get("generated") %}
+{% set saved = request.query_params.get("saved") %}
+{% if saved %}
+<div style="margin:0 0 12px 0;padding:10px 12px;border:1px solid #1f2937;background:#0b1220;border-radius:10px;color:#e5e7eb;font-size:12px;">Saved.</div>
+{% endif %}
+{% if gen %}
+<div style="margin:0 0 12px 0;padding:10px 12px;border:1px solid #1f2937;background:#0b1220;border-radius:10px;color:#e5e7eb;font-size:12px;">
+  Generated <b>{{ gen }}</b> questions.{% if request.query_params.get("errors") and request.query_params.get("errors")|int > 0 %} <span style="color:#fbbf24;">Errors: {{ request.query_params.get("errors") }}</span>{% endif %}
+</div>
+{% endif %}
+
 <table style="width:100%;border-collapse:collapse;font-size:12px;">
         <thead>
           <tr style="text-align:left;color:#9ca3af;border-bottom:1px solid #1f2937;">
@@ -41,13 +52,7 @@
             <td style="padding:8px;">{{ q.difficulty }}</td>
             <td style="padding:8px;">{{ q.region }}</td>
             <td style="padding:8px;">
-              {% if q.url %}
-                <span style="color:#22c55e;font-size:11px;">Approved</span>
-              {% else %}
-                <span style="color:#f97316;font-size:11px;">
-                  {% if q.media_status == 'PENDING' %}Pending{% elif q.media_status == 'REVIEW_REQUIRED' %}Review{% else %}-{% endif %}
-                </span>
-              {% endif %}
+              {% if q.media_status == "APPROVED" %}<span style="color:#22c55e;font-size:11px;">Approved</span>{% elif q.media_status == "REVIEW_REQUIRED" %}<span style="color:#f59e0b;font-size:11px;">Review</span>{% elif q.media_status == "PENDING" %}<span style="color:#f97316;font-size:11px;">Pending</span>{% else %}<span style="color:#9ca3af;font-size:11px;">-</span>{% endif %}
             </td>
             <td style="padding:8px;">{{ q.status }}</td>
             <td style="padding:8px;">

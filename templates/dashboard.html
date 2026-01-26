@@ -51,15 +51,7 @@
                 <strong>{{ c.name_en }}</strong><br/>
                 <span style="color:#9ca3af;">{{ c.name_ar }}</span>
               </td>
-              <td style="padding:8px;">
-                {% if c.scope == 'saudi' %}
-                  Saudi
-                {% elif c.scope == 'global' %}
-                  Global
-                {% else %}
-                  Mixed ({{ '%0.0f' % (c.saudi_ratio * 100) }}% Saudi)
-                {% endif %}
-              </td>
+              <td style="padding:8px;">{{ c.subtopic or "" }}</td>
               <td style="padding:8px;">{{ c.total }}</td>
               <td style="padding:8px;">{{ c.active }}</td>
               <td style="padding:8px;">{{ c.draft }}</td>
@@ -78,6 +70,40 @@
         <p style="font-size:13px;color:#6b7280;">No categories yet. <a href="/categories/new" style="color:#eab308;">Create one</a>.</p>
         {% endif %}
       </section>
+
+      <section style="margin-top:18px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <h2 style="margin:0;font-size:16px;">Recent audit</h2>
+          <a href="/audit" style="font-size:12px;color:#eab308;">View all →</a>
+        </div>
+        {% if recent_audit %}
+          <table style="width:100%;border-collapse:collapse;font-size:12px;">
+            <thead>
+              <tr style="text-align:left;color:#9ca3af;">
+                <th style="padding:8px 6px;border-bottom:1px solid #1f2937;">Time</th>
+                <th style="padding:8px 6px;border-bottom:1px solid #1f2937;">Actor</th>
+                <th style="padding:8px 6px;border-bottom:1px solid #1f2937;">Action</th>
+                <th style="padding:8px 6px;border-bottom:1px solid #1f2937;">Entity</th>
+                <th style="padding:8px 6px;border-bottom:1px solid #1f2937;">Message</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for l in recent_audit %}
+              <tr>
+                <td style="padding:7px 6px;border-bottom:1px solid #111827;color:#cbd5e1;">{{ l.created_at }}</td>
+                <td style="padding:7px 6px;border-bottom:1px solid #111827;color:#cbd5e1;">{{ l.actor }}</td>
+                <td style="padding:7px 6px;border-bottom:1px solid #111827;color:#cbd5e1;">{{ l.action }}</td>
+                <td style="padding:7px 6px;border-bottom:1px solid #111827;color:#cbd5e1;">{{ l.entity }} #{{ l.entity_id }}</td>
+                <td style="padding:7px 6px;border-bottom:1px solid #111827;color:#cbd5e1;">{{ l.message }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <div style="font-size:12px;color:#9ca3af;">No audit activity yet.</div>
+        {% endif %}
+      </section>
+
 {% endblock %}
   <div style="margin-top:28px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
@@ -95,7 +121,7 @@
           </tr>
         </thead>
         <tbody>
-          {% for l in logs %}
+          {% for l in (logs or recent_audit) %}
           <tr>
             <td style="opacity:.8;">{{ l.created_at }}</td>
             <td>{{ l.entity }}</td>
@@ -103,7 +129,7 @@
             <td style="opacity:.9;">{{ l.message }}</td>
           </tr>
           {% endfor %}
-          {% if logs|length == 0 %}
+          {% if (logs or recent_audit)|length == 0 %}
           <tr><td colspan="4" style="opacity:.7;">No audit events yet.</td></tr>
           {% endif %}
         </tbody>
