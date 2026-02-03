@@ -1,14 +1,66 @@
 import os
 from datetime import datetime
 from sqlalchemy import (
-    create_engine, Column, Integer, String, Text, Float, DateTime, ForeignKey, Boolean, inspect, text
+    create_engine,
+    Column,
+    Integer,
+    String,
+    Text,
+    Float,
+    DateTime,
+    ForeignKey,
+    Boolean,
+    inspect,
+    text,
+    event,
 )
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
+from sqlalchemy.pool import StaticPool
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./midan.db")
 
-connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
-engine = create_engine(DATABASE_URL, connect_args=connect_args)
+# SQLite can hit "database is locked" under concurrent writes (FastAPI threadpool + background agents).
+# Mitigations:
+# - WAL journal mode (better concurrency)
+# - busy_timeout (wait for locks instead of failing immediately)
+# - longer driver timeout
+connect_args = {}
+if DATABASE_URL.startswith("sqlite"):
+    connect_args = {
+        "check_same_thread": False,
+        # seconds: wait on file locks before raising
+        "timeout": float(os.getenv("SQLITE_TIMEOUT", "30")),
+    }
+
+engine = create_engine(
+    DATABASE_URL,
+    connect_args=connect_args,
+    pool_pre_ping=True,
+    poolclass=StaticPool,
+) if DATABASE_URL.startswith('sqlite') else create_engine(
+    DATABASE_URL,
+    connect_args=connect_args,
+    pool_pre_ping=True,
+)
+
+
+@event.listens_for(Engine, "connect")
+def _set_sqlite_pragmas(dbapi_connection, connection_record):
+    """Apply pragmatic defaults for SQLite concurrency & integrity."""
+    try:
+        cursor = dbapi_connection.cursor()
+        # Only applies to sqlite connections.
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.execute("PRAGMA synchronous=NORMAL")
+        cursor.execute("PRAGMA temp_store=MEMORY")
+        # milliseconds
+        cursor.execute(f"PRAGMA busy_timeout={int(float(os.getenv('SQLITE_BUSY_TIMEOUT_MS','5000')))}")
+        cursor.close()
+    except Exception:
+        # If not sqlite or pragma unsupported, ignore.
+        pass
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
@@ -57,7 +109,9 @@ class Question(Base):
 
     difficulty = Column(String(20), default="medium")  # easy/medium/hard/expert
     question_type = Column(String(20), default="text")  # text/picture/audio/video/logo
-    answer_type = Column(String(30), default="mcq_selection")  # mcq_selection/text
+    answer_type = Column(String(30), default="mcq_selection")  # legacy: mcq_selection/text_input
+    # Preferred: game type (MCQ, Text Input, Be Loud, etc.)
+    game_type = Column(String(30), default="mcq_selection")
     # Generation mode: TEXT (no media required) vs MEDIA (question depends on media)
     question_mode = Column(String(10), default="TEXT")  # TEXT/MEDIA
     # Media type when question_mode == MEDIA
@@ -84,6 +138,9 @@ class Question(Base):
 
     # Used for dedupe
     signature = Column(String(80), nullable=True, index=True)
+
+    # Hash of normalized stem (EN+AR). Used to prevent repeated questions across runs.
+    stem_hash = Column(String(40), nullable=True, index=True)
 
     # MCQ options (EN + AR)
     option1_en = Column(Text, nullable=True)
@@ -133,6 +190,7 @@ class AuditLog(Base):
     entity = Column(String(50), nullable=False)  # category|question|agent
     entity_id = Column(Integer, nullable=True)
     actor = Column(String(80), nullable=True)
+    action = Column(String(80), nullable=True)
     message = Column(Text, nullable=False)
     before_json = Column(Text, nullable=True)
     after_json = Column(Text, nullable=True)
@@ -141,6 +199,20 @@ class AuditLog(Base):
 
 def _sqlite_add_column(conn, table: str, col_def_sql: str) -> None:
     conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {col_def_sql}"))
+
+
+
+class LearningEvent(Base):
+    __tablename__ = "learning_events"
+
+    id = Column(Integer, primary_key=True, index=True)
+    category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
+    question_id = Column(Integer, ForeignKey("questions.id"), nullable=True)
+    actor = Column(String(80), nullable=True)
+    event_type = Column(String(80), nullable=False)  # e.g., edit_save, media_select
+    before_json = Column(Text, nullable=True)
+    after_json = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
 
 def ensure_schema() -> None:
@@ -184,6 +256,7 @@ def ensure_schema() -> None:
                 "difficulty": "difficulty VARCHAR(20) DEFAULT 'medium'",
                 "question_type": "question_type VARCHAR(20) DEFAULT 'text'",
                 "answer_type": "answer_type VARCHAR(30) DEFAULT 'mcq_selection'",
+                "game_type": "game_type VARCHAR(30) DEFAULT \'mcq_selection\'",
                 "question_mode": "question_mode VARCHAR(10)",
                 "media_intent_json": "media_intent_json TEXT",
                 "region": "region VARCHAR(20) DEFAULT 'saudi'",
@@ -199,6 +272,7 @@ def ensure_schema() -> None:
                 "media_selected_score": "media_selected_score VARCHAR(20)",
                 "current_affairs": "current_affairs BOOLEAN DEFAULT 0",
                 "signature": "signature VARCHAR(80)",
+                "stem_hash": "stem_hash VARCHAR(40)",
                 "option1_en": "option1_en TEXT",
                 "option2_en": "option2_en TEXT",
                 "option3_en": "option3_en TEXT",
@@ -215,6 +289,34 @@ def ensure_schema() -> None:
             for name, ddl in needed.items():
                 if name not in cols:
                     _sqlite_add_column(conn, "questions", ddl)
+
+
+        # --- backfills / data fixes ---
+        try:
+            if insp.has_table("questions"):
+                cols_q = {c["name"] for c in insp.get_columns("questions")}
+                if "game_type" in cols_q and "answer_type" in cols_q:
+                    conn.execute(text("UPDATE questions SET game_type = COALESCE(game_type, answer_type) WHERE game_type IS NULL OR game_type = ''"))
+                # Backfill stem_hash for existing rows if column exists
+                if "stem_hash" in cols_q:
+                    import hashlib, re
+
+                    def _norm(en: str, ar: str) -> str:
+                        s = " ".join([(en or ""), (ar or "")]).strip().lower()
+                        s = re.sub(r"[^\w\s\u0600-\u06FF]", " ", s)
+                        s = re.sub(r"\s+", " ", s).strip()
+                        return s
+
+                    rows = conn.execute(text("SELECT id, stem_en, stem_ar FROM questions WHERE stem_hash IS NULL OR stem_hash = ''")).fetchall()
+                    for rid, en, ar in rows:
+                        h = hashlib.sha1(_norm(en or "", ar or "").encode("utf-8")).hexdigest()
+                        conn.execute(text("UPDATE questions SET stem_hash = :h WHERE id = :id"), {"h": h, "id": rid})
+            if insp.has_table("audit_logs"):
+                cols_a = {c["name"] for c in insp.get_columns("audit_logs")}
+                if "action" in cols_a:
+                    conn.execute(text("UPDATE audit_logs SET action = COALESCE(action, message) WHERE action IS NULL OR action = ''"))
+        except Exception:
+            pass
 
         # --- media_candidates ---
         if insp.has_table("media_candidates"):
@@ -238,6 +340,7 @@ def ensure_schema() -> None:
                 "entity_id": "entity_id INTEGER",
                 "actor": "actor VARCHAR(80)",
                 "message": "message TEXT",
+                "action": "action VARCHAR(80)",
                 "before_json": "before_json TEXT",
                 "after_json": "after_json TEXT",
                 "created_at": "created_at DATETIME",
