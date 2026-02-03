@@ -21,11 +21,13 @@
     <div class="midan-field">
       <label class="midan-label">Difficulty</label>
       <select class="midan-input" name="difficulty" id="difficulty">
+        <option value="ladder">Ladder (Easy → Medium → Hard)</option>
         <option value="easy">Easy</option>
         <option value="medium" selected>Medium</option>
         <option value="hard">Hard</option>
         <option value="expert">Expert</option>
       </select>
+      <div class="midan-help">Ladder generates <b>count × 3</b> questions: Easy, Medium, then Hard.</div>
     </div>
 
     <div class="midan-field">
@@ -74,10 +76,11 @@
     </div>
 
     <div class="midan-field">
-      <label class="midan-label">Answer type</label>
-      <select class="midan-input" name="answer_type" id="answer_type">
+      <label class="midan-label">Game type</label>
+      <select class="midan-input" name="game_type" id="game_type">
         <option value="mcq_selection" selected>MCQ</option>
-        <option value="text_answer">Text answer</option>
+        <option value="text_input">Text input</option>
+        <option value="be_loud">Be Loud</option>
       </select>
     </div>
   </div>

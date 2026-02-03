@@ -41,10 +41,11 @@
         </div>
 
         <div>
-          <label class="midan-label">Answer type</label>
-          <select class="midan-input" name="answer_type">
-            <option value="mcq_selection" {% if q.answer_type == 'mcq_selection' %}selected{% endif %}>MCQ</option>
-            <option value="text_input" {% if q.answer_type == 'text_input' %}selected{% endif %}>Text input</option>
+          <label class="midan-label">Game type</label>
+          <select class="midan-input" name="game_type">
+            <option value="mcq_selection" {% if (q.game_type or q.answer_type) == 'mcq_selection' %}selected{% endif %}>MCQ</option>
+            <option value="text_input" {% if (q.game_type or q.answer_type) == 'text_input' %}selected{% endif %}>Text input</option>
+            <option value="be_loud" {% if (q.game_type or q.answer_type) == 'be_loud' %}selected{% endif %}>Be Loud</option>
           </select>
         </div>
 
@@ -161,6 +162,32 @@
       </div>
 
       <div class="midan-field">
+        <label class="midan-label">Final media preview</label>
+        {% set u = (q.url or '') %}
+        {% if u %}
+          {% if ('youtube.com' in u) or ('youtu.be' in u) %}
+            {% set vid = u.split('v=')[-1].split('&')[0] if 'v=' in u else u.split('/')[-1] %}
+            <iframe style="width:100%;aspect-ratio:16/9;border:1px solid #0f172a;border-radius:12px;" src="https://www.youtube.com/embed/{{ vid }}" allowfullscreen></iframe>
+          {% elif u.endswith('.mp4') or u.endswith('.webm') %}
+            <video controls style="width:100%;border-radius:12px;border:1px solid #0f172a;">
+              <source src="{{ u }}">
+            </video>
+          {% elif u.endswith('.mp3') or u.endswith('.wav') or u.endswith('.ogg') or u.endswith('.m4a') %}
+            <audio controls style="width:100%;">
+              <source src="{{ u }}">
+            </audio>
+          {% elif ('.jpg' in u) or ('.jpeg' in u) or ('.png' in u) or ('.webp' in u) or ('images.pexels.com' in u) or ('upload.wikimedia.org' in u) or ('images.unsplash.com' in u) %}
+            <img src="{{ u }}" style="width:100%;border-radius:12px;display:block;border:1px solid #0f172a;">
+          {% else %}
+            <div style="font-size:12px;color:#9ca3af;word-break:break-all;">{{ u }}</div>
+          {% endif %}
+        {% else %}
+          <div style="font-size:12px;color:#6b7280;">No final media selected yet.</div>
+        {% endif %}
+      </div>
+
+
+      <div class="midan-field">
         <label class="midan-label">Or upload media</label>
         <input class="midan-input" type="file" name="media_file">
         <div style="font-size:12px;color:#6b7280;margin-top:4px;">Uploaded files are stored locally and override the URL.</div>
@@ -177,10 +204,32 @@
               </div>
 
               {% if c.url %}
-                {% if (".jpg" in c.url or ".jpeg" in c.url or ".png" in c.url or "images.pexels.com" in c.url or "upload.wikimedia.org" in c.url or "images.unsplash.com" in c.url) %}
+                {% set cu = (c.url or '') %}
+                {% if 'youtube.com/watch' in cu or 'youtu.be/' in cu %}
+                  {% set vid = cu.split('v=')[-1].split('&')[0] if 'v=' in cu else cu.split('/')[-1] %}
+                  <iframe width="100%" height="180" style="border:0;border-radius:10px;" src="https://www.youtube.com/embed/{{ vid }}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                {% elif cu.endswith('.mp4') or cu.endswith('.webm') or cu.endswith('.mov') %}
+                  <video src="{{ cu }}" controls style="width:100%;border-radius:10px;border:1px solid #0f172a;"></video>
+                {% elif cu.endswith('.mp3') or cu.endswith('.wav') or cu.endswith('.ogg') %}
+                  <audio src="{{ cu }}" controls style="width:100%;"></audio>
+                {% elif ('.jpg' in cu or '.jpeg' in cu or '.png' in cu or 'images.pexels.com' in cu or 'upload.wikimedia.org' in cu or 'images.unsplash.com' in cu or 'openverse' in cu) %}
                   <img src="{{ c.url }}" style="width:100%;border-radius:10px;display:block;border:1px solid #0f172a;">
                 {% else %}
-                  <div style="font-size:12px;color:#9ca3af;word-break:break-all;">{{ c.url }}</div>
+                  {% set cu = (c.url or '') %}
+                  {% if ('youtube.com' in cu) or ('youtu.be' in cu) %}
+                    {% set vid = cu.split('v=')[-1].split('&')[0] if 'v=' in cu else cu.split('/')[-1] %}
+                    <iframe style="width:100%;aspect-ratio:16/9;border:1px solid #0f172a;border-radius:10px;" src="https://www.youtube.com/embed/{{ vid }}" allowfullscreen></iframe>
+                  {% elif cu.endswith('.mp4') or cu.endswith('.webm') %}
+                    <video controls style="width:100%;border-radius:10px;border:1px solid #0f172a;">
+                      <source src="{{ cu }}">
+                    </video>
+                  {% elif cu.endswith('.mp3') or cu.endswith('.wav') or cu.endswith('.ogg') or cu.endswith('.m4a') %}
+                    <audio controls style="width:100%;">
+                      <source src="{{ cu }}">
+                    </audio>
+                  {% else %}
+                    <div style="font-size:12px;color:#9ca3af;word-break:break-all;">{{ c.url }}</div>
+                  {% endif %}
                 {% endif %}
               {% endif %}
             </label>

@@ -9,6 +9,28 @@
         </div>
       {% endif %}
 
+      {% if media_source_health %}
+      <div style="padding:14px;border-radius:18px;background:#0b1120;border:1px solid #1f2937;margin-bottom:14px;">
+        <h3 style="margin:0 0 10px 0;font-size:15px;">Media Source Health</h3>
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;">
+          {% for name, info in media_source_health.items() %}
+            {% set st = (info.get('status') or 'yellow') %}
+            {% if st == 'green' %}{% set dot = '#22c55e' %}
+            {% elif st == 'red' %}{% set dot = '#ef4444' %}
+            {% else %}{% set dot = '#f59e0b' %}{% endif %}
+            <div style="border:1px solid #1f2937;border-radius:14px;padding:10px;background:#050b18;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                <span style="display:inline-block;width:10px;height:10px;border-radius:999px;background:{{ dot }};"></span>
+                <div style="font-weight:700;">{{ name }}</div>
+              </div>
+              <div style="font-size:12px;color:#9ca3af;line-height:1.3;">{{ info.get('detail') or '' }}</div>
+            </div>
+          {% endfor %}
+        </div>
+        <div style="font-size:12px;color:#6b7280;margin-top:8px;">Green = reachable, Yellow = degraded/missing key, Red = failing.</div>
+      </div>
+      {% endif %}
+
       <div style="padding:14px;border-radius:18px;background:#0b1120;border:1px solid #1f2937;margin-bottom:14px;">
         <h3 style="margin:0 0 6px 0;font-size:15px;">Media Agent</h3>
         <p style="margin:0 0 12px 0;font-size:12px;color:#9ca3af;">
