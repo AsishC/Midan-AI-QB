@@ -14,3 +14,5 @@ openai>=1.30.0,<2
 
 # Optional: enable Postgres deployments (e.g., Render)
 psycopg2-binary>=2.9.9,<3
+
+itsdangerous>=2.1.2
